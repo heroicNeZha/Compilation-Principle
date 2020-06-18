@@ -1,0 +1,4 @@
+bison -dyv calc.y
+flex calc.l
+gcc-8 -o calc y.tab.c lex.yy.c
+chmod +x calc
