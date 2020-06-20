@@ -5,22 +5,14 @@
 
 extern int cur_line_num;
 int yylex();
-void yyerror(const char* msg) {
-    printf("ERROR: %s at line %d \n", msg, cur_line_num);
-}
+void printProduction(char* nonTerminal,char* symbol);
+void yyerror(const char* msg);
 %}
 
-// %start Program
+%start Program
 
 /*bison可以从这个定义中产生yylval的定义*/ 
 %union { 
-    int     integerConstant; 
-    int     boolConstant; 
-    const   char *stringConstant; 
-    double  doubleConstant; 
-    char    identifier[128]; 
-
-
     int      ival;
     char     *sval;
     double   dval;
@@ -37,21 +29,14 @@ void yyerror(const char* msg) {
 %token    T_Int               
 %token    T_Double            
 %token    T_Boolean           
-%token    T_String            
-%token    T_Class             
-%token    T_Interface         
-%token    T_Null              
-%token    T_This              
-%token    T_Extends           
-%token    T_Implements        
+%token    T_String    
+%token    T_Null             
 %token    T_For               
 %token    T_While             
 %token    T_If                
 %token    T_Else              
 %token    T_Return            
-%token    T_Break             
-%token    T_New               
-%token    T_NewArray          
+%token    T_Break            
 %token    T_Print             
 %token    T_ReadInteger       
 %token    T_ReadLine          
@@ -77,204 +62,163 @@ void yyerror(const char* msg) {
 %nonassoc T_IFX
 
 %%
-Program     :   ClassDefn               { printf("%15s -> %s \n", "Program", "ClassDefn");         } 
-            |   Program ClassDefn       { printf("%15s -> %s \n", "Program", "Program ClassDefn"); }
-            |   error                   { yyerror("Program");                                      }
+Program     :   Fieldlist               { printProduction( "Program", "Fieldlist");                 } 
+            |   Fieldlist Function      { printProduction( "Program", "Fieldlist Function");        } 
+            |   error                   { yyerror("Program");                                       }
             ; 
 
-VariableDecl:   Variable ';'            { printf("%15s -> %s \n",  "VariableDecl", "Variable ;");  } 
-            |   error                   { yyerror("VariableDecl");                                 }
+/* 函数 */             
+Function    :   Type T_Identifier '(' FormalParams ')' StmtBlock 
+                                       { printf("%15s -> %-15s \n",  "Function", "Type Identifier(FormalParams) StmtBlock"); } 
             ;
 
+Fieldlist   :   Fieldlist Field         { printProduction("Fieldlist", "Fieldlist Field");          } 
+            |                           { printProduction("Fieldlist", " ");                        }
+            |   error                   { yyerror("Fieldlist");                                     }
+            ;
+
+Field       :   Variable                { printProduction("Field", "Variable");                     }
+            |   Function                { printProduction("Field", "Function");                     } 
+            ;
 /* 变量定义 */
-Variable    :   Type T_Identifier       { 
-                                          printf("%15s -> %-15s |",  "Variable", "Type Identifier");  
-                                          printf("%15s -> %s %s \n",  "Variable", "Type", $2);  
-                                        } 
-            |   error                   { yyerror("Variable");                                     }
+VariableDecl:   Type T_Identifier       { printProduction("VariableDecl", "Type Identifier");       }
+            |   error                   { yyerror("Variable");                                      }
+            ;
+
+Variable    :   VariableDecl ';'        { printProduction("Variable", "VariableDecl");              } 
+            |   error                   { yyerror("Variable");                                      }
             ;
 
 /* 变量类型 */
-Type        :   T_Int                   { printf("%15s -> %s \n",  "Type", "Int");      } 
-            |   T_Double                { printf("%15s -> %s \n",  "Type", "Double");    } 
-            |   T_Boolean               { printf("%15s -> %s \n",  "Type", "Bool");      } 
-            |   T_String                { printf("%15s -> %s \n",  "Type", "String");    } 
-            |   T_Void                  { printf("%15s -> %s \n",  "Type", "Void");      } 
-            |   T_Class T_Identifier    { 
-                                          printf("%15s -> %-15s |","Type", "Identifier");  
-                                          printf("%15s -> %s %s\n", "Type", "class", $2);
-                                        } 
-            |   Type '[' ']'            { printf("%15s -> %s \n",  "Type", "Type[]");    } 
-            |   error                   { yyerror("Type");                               }
+Type        :   T_Int                   { printProduction("Type", "Int");                           } 
+            |   T_Double                { printProduction("Type", "Double");                        } 
+            |   T_Boolean               { printProduction("Type", "Bool");                          } 
+            |   T_String                { printProduction("Type", "String");                        } 
+            |   T_Void                  { printProduction("Type", "Void");                          } 
+            |   Type '[' ']'            { printProduction("Type", "Type[]");                        } 
+            |   error                   { yyerror("Type");                                          }
             ;
 
 /* 函数参数列表 */
-Formals     :   VariableMore            { printf("%15s -> %s \n",  "Formals", "VariableMore,"); } 
-            |   /* empty */             { printf("%15s -> %s \n",  "Formals", " ");             } 
-            ;
-
-VariableMore:   Variable                { printf("%15s -> %s \n",  "VariableMore", "Variable");           } 
-            |   VariableMore ',' Variable
-                                        { printf("%15s -> %s \n",  "Formals", "VariableMore , Variable"); } 
-            ;
-
-/* 函数定义 */            
-FunctionDecl:   Type T_Identifier '(' Formals ')' ';'    { 
-                                        printf("%15s -> %-15s |",  "FunctionDecl", "Identifier(Formals)"); 
-                                        printf("%15s -> %s \n",    "FunctionDecl", $2);           
-                                        } 
-            ;
-
-/* 函数体 */             
-FunctionDefn:   Type T_Identifier '(' Formals ')' StmtBlock 
-                                       { printf("%15s -> %-15s \n",  "FunctionDefn", "Identifier(Formals) StmtBlock"); } 
-            ;
-
-/* 类定义 */  
-ClassDefn   :   T_Class T_Identifier ExtendsQ '{' Fieldlist '}'   
-                                        { printf("Class Identifier ExtendsQ { Fieldlist } \n");           } 
-            ;
-
-ExtendsQ    :   T_Extends T_Identifier  { printf("%15s -> %s \n",  "ExtendsQ", "T_Extends T_Identifier"); } 
-            |   /* empty */             { printf("%15s -> %s \n",  "ExtendsQ", " ");                      } 
-            ;
-
-Fieldlist   :   Fieldlist Field         { printf("%15s -> %s \n",  "Fieldlist", "Fieldlist Field");       } 
-            |   /* empty */             { printf("%15s -> %s \n",  "Fieldlist", " ");                     }
-            |   error                   { yyerror("Fieldlist");                                           }
-            ;
-
-Field       :   VariableDecl            { printf("%15s -> %s \n",  "Field", "VariableDecl");     } 
-            |   FunctionDecl            { printf("%15s -> %s \n",  "Field", "FunctionDecl");     } 
-            |   FunctionDefn            { printf("%15s -> %s \n",  "Field", "FunctionDefn");     } 
+FormalParams:   VariableDecl            { printProduction("FormalParams", "VariableDecl");          } 
+            |   FormalParams ',' VariableDecl { printProduction("FormalParams", "FormalParams , VariableDecl");   } 
+            |                           { printProduction("FormalParams", " ");                     } 
             ;
 
 /* 语句块 */            
-StmtBlock   :   '{' Stmtlist '}'        { printf("%15s -> %s \n",  "StmtBlock", ":{ Stmtlist } ");} 
-            |   error                   { yyerror("StmtBlock");                                   }
+StmtBlock   :   '{' Stmtlist '}'        { printProduction("StmtBlock", ":{ Stmtlist } ");           } 
+            |   error                   { yyerror("StmtBlock");                                     }
             ;
 
-Stmtlist    :   Stmtlist Stmt           { printf("%15s -> %s \n",  "Stmtlist", "Stmtlist Stmt");  } 
-            |   /* empty */             { printf("%15s -> %s \n",  "Stmtlist", " ");              }
+Stmtlist    :   Stmtlist Stmt           { printProduction("Stmtlist", "Stmtlist Stmt");             } 
+            |                           { printProduction("Stmtlist", " ");                         }
             ; 
 
-Stmt        :   VariableDecl            { printf("%15s -> %s \n",  "Stmt", "VariableDecl");       } 
-            |   SimpleStmt ';'          { printf("%15s -> %s \n",  "Stmt", "SimpleStmt ;");       } 
-            |   IfStmt                  { printf("%15s -> %s \n",  "Stmt", "IfStmt");             } 
-            |   WhileStmt               { printf("%15s -> %s \n",  "Stmt", "WhileStmt ");         } 
-            |   ForStmt                 { printf("%15s -> %s \n",  "Stmt", "ForStmt ");           } 
-            |   BreakStmt ';'           { printf("%15s -> %s \n",  "Stmt", "BreakStmt ;");        } 
-            |   ReturnStmt ';'          { printf("%15s -> %s \n",  "Stmt", "ReturnStmt ;");       } 
-            |   PrintStmt ';'           { printf("%15s -> %s \n",  "Stmt", "PrintStmt ;");        } 
-            |   StmtBlock               { printf("%15s -> %s \n",  "Stmt", "StmtBlock ");         }
+Stmt        :   Variable                { printProduction("Stmt", "Variable");                      } 
+            |   SimpleStmt ';'          { printProduction("Stmt", "SimpleStmt ;");                  } 
+            |   IfStmt                  { printProduction("Stmt", "IfStmt");                        } 
+            |   WhileStmt               { printProduction("Stmt", "WhileStmt ");                    } 
+            |   ForStmt                 { printProduction("Stmt", "ForStmt ");                      } 
+            |   BreakStmt ';'           { printProduction("Stmt", "BreakStmt ;");                   } 
+            |   ReturnStmt ';'          { printProduction("Stmt", "ReturnStmt ;");                  } 
+            |   PrintStmt ';'           { printProduction("Stmt", "PrintStmt ;");                   } 
+            |   StmtBlock               { printProduction("Stmt", "StmtBlock ");                    }
             ;
 
 /* 语句 */
-SimpleStmt  :   LValue '=' Expr         { printf("%15s -> %s \n",  "SimpleStmt", "LValue = Expr ");} 
-            |   Call                    { printf("%15s -> %s \n",  "SimpleStmt", "Call ");         } 
-            |   /* empty */             { printf("%15s -> %s \n",  "SimpleStmt", " ");             } 
-            |   error                   { yyerror("SimpleStmt");                                   }
+SimpleStmt  :   LValue '=' Expr         { printProduction("SimpleStmt", "LValue = Expr ");          } 
+            |   Call                    { printProduction("SimpleStmt", "Call ");                   } 
+            |                           { printProduction("SimpleStmt", " ");                       } 
+            |   error                   { yyerror("SimpleStmt");                                    }
             ;
 
 /* 左值 */            
-LValue      :   Expr '.' T_Identifier   { printf("%15s -> %s \n",  "LValue", "Expr . T_Identifier");} 
-            |   T_Identifier            { printf("%15s -> %s \n",  "LValue", "T_Identifier");       }
-            |   Expr '[' Expr ']'       { printf("%15s -> %s \n",  "LValue", "Expr [ Expr ] ");     } 
+LValue      :   T_Identifier            { printProduction("LValue", "T_Identifier");                }
+            |   Expr '[' Expr ']'       { printProduction("LValue", "Expr [ Expr ] ");              } 
             |   error                   { yyerror("LValue");                                        }
             ;
 
 /* 调用 */            
-Call        :   Expr '.' T_Identifier '(' Actuals ')'                
-                                        { printf("%15s -> %s \n", "Call", "Expr . T_Identifier ( Actuals ) ");} 
-            |   T_Identifier '(' Actuals ')'
-                                        { printf("%15s -> %s \n", "Call", "T_Identifier ( Actuals ) ");       } 
+Call        :   T_Identifier '(' ActualParams ')'
+                                        { printProduction( "Call", "T_Identifier ( ActualParams ) ");    } 
             ;
 
-Actuals     :   ExprMore                { printf("%15s -> %s \n",  "Actuals", "ExprMore");                    } 
-            |   /* empty */             { printf("%15s -> %s \n",  "Actuals", "");                            } 
+ActualParams:   ExprMore                { printProduction("ActualParams", "ExprMore");                   } 
+            |                           { printProduction("Actuals", "");                           } 
             ;
 
-ExprMore    :   Expr                    { printf("%15s -> %s \n",  "ExprMore", "Expr");                       } 
-            |   ExprMore ',' Expr       { printf("%15s -> %s \n",  "ExprMore", "ExprMore , Expr");            } 
+ExprMore    :   Expr                    { printProduction("ExprMore", "Expr");                      } 
+            |   ExprMore ',' Expr       { printProduction("ExprMore", "ExprMore , Expr");           } 
             ;
 
 ForStmt     :   T_For '(' SimpleStmt ';' BoolExpr ';' SimpleStmt ')' Stmt   
-                                        { printf("%15s -> %s \n",  "ForStmt", "For (SimpleStmt BoolExpr SimpleStmt ) Stmt ");} 
+                                        { printProduction("ForStmt", "For (SimpleStmt BoolExpr SimpleStmt ) Stmt ");} 
             ;
 
 WhileStmt   :   T_While '(' BoolExpr ')' Stmt
-                                        { printf("%15s -> %s \n",  "WhileStmt", "While ( BoolExpr ) Stmt ");  } 
+                                        { printProduction("WhileStmt", "While ( BoolExpr ) Stmt "); } 
             ;
 
 IfStmt      :   T_If '(' BoolExpr ')' Stmt %prec T_IFX
-                                        { printf("%15s -> %s \n",  "IfStmt", "If (BoolExpr ) Stmt %prec T_IFX "); }
+                                        { printProduction("IfStmt", "If (BoolExpr ) Stmt %prec T_IFX ");    }
             |   T_If '(' BoolExpr ')' Stmt T_Else Stmt
-                                        { printf("%15s -> %s \n",  "IfStmt", "If (BoolExpr ) Stmt T_Else Stmt "); }
+                                        { printProduction("IfStmt", "If (BoolExpr ) Stmt T_Else Stmt ");    }
             ;
 
-ReturnStmt  :   T_Return                { printf("%15s -> %s \n",  "ReturnStmt", "Return");                   } 
-            |   T_Return Expr           { printf("%15s -> %s \n",  "ReturnStmt", "Return Expr ");             } 
+ReturnStmt  :   T_Return                { printProduction("ReturnStmt", "Return");                  } 
+            |   T_Return Expr           { printProduction("ReturnStmt", "Return Expr ");            } 
             ;
             
-BreakStmt   :   T_Break                 { printf("%15s -> %s \n",  "ReturnStmt", "Break");                    }  
+BreakStmt   :   T_Break                 { printProduction("ReturnStmt", "Break");                   }  
             ;
 
-PrintStmt   :   T_Print '(' ExprMore ')'{ printf("%15s -> %s \n",  "PrintStmt", "Print (ExprMore) ");         } 
+PrintStmt   :   T_Print '(' ExprMore ')'{ printProduction("PrintStmt", "Print (ExprMore) ");        } 
             ;
 
-BoolExpr    :   Expr                    { printf("%15s -> %s \n",  "BoolExpr", "Expr");          } 
+BoolExpr    :   Expr                    { printProduction("BoolExpr", "Expr");                      } 
             ;
 
-Expr        :   Constant                { printf("%15s -> %s \n",  "Expr", "Constant");          } 
-            |   LValue                  { printf("%15s -> %s \n",  "Expr", "LValue");            } 
-            |   T_This                  { printf("%15s -> %s \n",  "Expr", "This");              } 
-            |   Call                    { printf("%15s -> %s \n",  "Expr", "Call");              } 
-            |   '(' Expr')'             { printf("%15s -> %s \n",  "Expr", "( Expr) ");          } 
-            |   Expr '+' Expr           { printf("%15s -> %s \n",  "Expr", "Expr + Expr ");      } 
-            |   Expr '-' Expr           { printf("%15s -> %s \n",  "Expr", "Expr - Expr ");      } 
-            |   Expr '*' Expr           { printf("%15s -> %s \n",  "Expr", "Expr * Expr ");      } 
-            |   Expr '/' Expr           { printf("%15s -> %s \n",  "Expr", "Expr /Expr ");       } 
-            |   Expr '%' Expr           { printf("%15s -> %s \n",  "Expr", "Expr % Expr ");      } 
-            |   '-' Expr                { printf("%15s -> %s \n",  "Expr", "- Expr ");           } 
-            |   Expr '<' Expr           { printf("%15s -> %s \n",  "Expr", "Expr < Expr ");      } 
-            |   Expr T_Le Expr          { printf("%15s -> %s \n",  "Expr", "LessEqual Expr ");   } 
-            |   Expr '>' Expr           { printf("%15s -> %s \n",  "Expr", "Expr >Expr ");       } 
-            |   Expr T_Ge Expr          { printf("%15s -> %s \n",  "Expr", "GreaterEqual");      } 
-            |   Expr T_Eq Expr          { printf("%15s -> %s \n",  "Expr", "Equal Expr ");       } 
-            |   Expr T_Ne Expr          { printf("%15s -> %s \n",  "Expr", "NotEqual Expr ");    } 
-            |   Expr T_And Expr         { printf("%15s -> %s \n",  "Expr", "And Expr ");         } 
-            |   Expr T_Or Expr          { printf("%15s -> %s \n",  "Expr", "Or Expr ");          } 
-            |   '!' Expr                { printf("%15s -> %s \n",  "Expr", "! Expr ");           } 
-            |   T_ReadInteger '(' ')'   { printf("%15s -> %s \n",  "Expr", "Expr ReadInteger ( ) "); } 
-            |   T_ReadLine '(' ')'      { printf("%15s -> %s \n",  "Expr", "Expr ReadLine ( ) ");    } 
-            |   T_New T_Identifier '(' ')'  
-                                        { printf("%15s -> %s \n",  "Expr", "New Identifier ( ) ");   }
-            |   T_NewArray '(' Expr ',' Type ')' 
-                                        { printf("%15s -> %s \n",  "Expr", "NewArray ( Expr , Type )");}
+Expr        :   Constant                { printProduction("Expr", "Constant");                      } 
+            |   LValue                  { printProduction("Expr", "LValue");                        }
+            |   Call                    { printProduction("Expr", "Call");                          } 
+            |   '('Expr')'              { printProduction("Expr", "( Expr) ");                      } 
+            |   Expr '+' Expr           { printProduction("Expr", "Expr + Expr ");                  } 
+            |   Expr '-' Expr           { printProduction("Expr", "Expr - Expr ");                  } 
+            |   Expr '*' Expr           { printProduction("Expr", "Expr * Expr ");                  } 
+            |   Expr '/' Expr           { printProduction("Expr", "Expr /Expr ");                   } 
+            |   Expr '%' Expr           { printProduction("Expr", "Expr % Expr ");                  } 
+            |   '-' Expr                { printProduction("Expr", "- Expr ");                       } 
+            |   Expr '<' Expr           { printProduction("Expr", "Expr < Expr ");                  } 
+            |   Expr T_Le Expr          { printProduction("Expr", "LessEqual Expr ");               } 
+            |   Expr '>' Expr           { printProduction("Expr", "Expr >Expr ");                   } 
+            |   Expr T_Ge Expr          { printProduction("Expr", "GreaterEqual");                  } 
+            |   Expr T_Eq Expr          { printProduction("Expr", "Equal Expr ");                   } 
+            |   Expr T_Ne Expr          { printProduction("Expr", "NotEqual Expr ");                } 
+            |   Expr T_And Expr         { printProduction("Expr", "And Expr ");                     } 
+            |   Expr T_Or Expr          { printProduction("Expr", "Or Expr ");                      } 
+            |   '!' Expr                { printProduction("Expr", "! Expr ");                       } 
+            |   T_ReadInteger '(' ')'   { printProduction("Expr", "Expr ReadInteger ( ) ");         } 
+            |   T_ReadLine '(' ')'      { printProduction("Expr", "Expr ReadLine ( ) ");            }
             ;
 
 /* 常量 */            
-Constant    :   T_IntConstant           { 
-                                        printf("%15s -> %-15s |",  "Constant", "IntConstant");   
-                                        printf("%15s -> %d \n",    "Constant", $1);                     
-                                        } 
-            |   T_DoubleConstant        { 
-                                        printf("%15s -> %-15s |",  "Constant", "DoubleConstant");
-                                        printf("%15s -> %f \n",    "Constant", $1);                       
-                                        } 
-            |   T_BooleanConstant       { 
-                                        printf("%15s -> %-15s |",  "Constant", "BoolConstant"); 
-                                        printf("%15s -> %d \n",    "Constant", $1);   
-                                        }  
-            |   T_StringConstant        { 
-                                        printf("%15s -> %-15s |",  "Constant", "StringConstant"); 
-                                        printf("%15s -> %s \n",     "Constant", $1);   
-                                        } 
-            |   T_Null                  { printf("%15s -> %s\n",      "Constant", "Null");           }
+Constant    :   T_IntConstant           { printProduction("Constant", "IntConstant");printf("%20c %-d\n",'|',$1);  } 
+            |   T_DoubleConstant        { printProduction("Constant", "DoubleConstant");printf("%20c %-f\n",'|',$1);     } 
+            |   T_BooleanConstant       { printProduction("Constant", "BoolConstant");printf("%20c %-d\n",'|',$1);   }  
+            |   T_StringConstant        { printProduction("Constant", "StringConstant");printf("%20c %-s\n",'|',$1);     } 
+            |   T_Null                  { printProduction("Constant", "Null");                      }
             ;
 
 %%
 
 int main() {
     return yyparse();
+}
+
+void printProduction(char* nonTerminal,char* symbol){
+    printf("%15s -> %s\n",nonTerminal,symbol);
+}
+
+void yyerror(const char* msg) {
+    printf("ERROR: %s at line %d \n", msg, cur_line_num);
 }

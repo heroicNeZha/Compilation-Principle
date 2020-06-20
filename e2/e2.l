@@ -3,7 +3,7 @@
 void lex_error(char* msg, int line);
 %}
 
-delim        [ \t]
+delim        [ \t\r\a]
 whitespace   {delim}+
 letter       [A-Za-z]
 digit        [0-9]
@@ -32,20 +32,13 @@ comment      ("//"[^\n]*)|("/*"[^\*/]*"\*/")
 "double"       { return T_Double;          }
 "bool"         { return T_Boolean;         }
 "string"       { return T_String;          }
-"class"        { return T_Class;           }
-"interface"    { return T_Interface;       }
 "null"         { return T_Null;            }
-"this"         { return T_This;            }
-"extends"      { return T_Extends;         }
-"implements"   { return T_Implements;      }
 "for"          { return T_For;             }
 "while"        { return T_While;           }
 "if"           { return T_If;              }
 "else"         { return T_Else;            }
 "return"       { return T_Return;          }
 "break"        { return T_Break;           }
-"New"          { return T_New;             }
-"NewArray"     { return T_NewArray;        }
 "Print"        { return T_Print;           }
 "ReadInteger"  { return T_ReadInteger;     }
 "ReadLine"     { return T_ReadLine;        }
@@ -60,7 +53,7 @@ comment      ("//"[^\n]*)|("/*"[^\*/]*"\*/")
 {whitespace}   { /* skip */                }
 {comment}      { /* skip */                }
 
-.              { lex_error("Unrecognized character", cur_line_num);        }
+.              { lex_error("Unrecognized character", cur_line_num);    }
 <<EOF>>        { return 0;                 }
 
 

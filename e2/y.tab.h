@@ -50,35 +50,28 @@
      T_Double = 266,
      T_Boolean = 267,
      T_String = 268,
-     T_Class = 269,
-     T_Interface = 270,
-     T_Null = 271,
-     T_This = 272,
-     T_Extends = 273,
-     T_Implements = 274,
-     T_For = 275,
-     T_While = 276,
-     T_If = 277,
-     T_Else = 278,
-     T_Return = 279,
-     T_Break = 280,
-     T_New = 281,
-     T_NewArray = 282,
-     T_Print = 283,
-     T_ReadInteger = 284,
-     T_ReadLine = 285,
-     T_IntConstant = 286,
-     T_DoubleConstant = 287,
-     T_StringConstant = 288,
-     T_Identifier = 289,
-     T_BooleanConstant = 290,
-     T_Lineend = 291,
-     T_OR = 292,
-     T_AND = 293,
-     T_HET = 294,
-     T_LET = 295,
-     T_ELSE = 296,
-     T_IFX = 297
+     T_Null = 269,
+     T_For = 270,
+     T_While = 271,
+     T_If = 272,
+     T_Else = 273,
+     T_Return = 274,
+     T_Break = 275,
+     T_Print = 276,
+     T_ReadInteger = 277,
+     T_ReadLine = 278,
+     T_IntConstant = 279,
+     T_DoubleConstant = 280,
+     T_StringConstant = 281,
+     T_Identifier = 282,
+     T_BooleanConstant = 283,
+     T_Lineend = 284,
+     T_OR = 285,
+     T_AND = 286,
+     T_HET = 287,
+     T_LET = 288,
+     T_ELSE = 289,
+     T_IFX = 290
    };
 #endif
 /* Tokens.  */
@@ -93,57 +86,43 @@
 #define T_Double 266
 #define T_Boolean 267
 #define T_String 268
-#define T_Class 269
-#define T_Interface 270
-#define T_Null 271
-#define T_This 272
-#define T_Extends 273
-#define T_Implements 274
-#define T_For 275
-#define T_While 276
-#define T_If 277
-#define T_Else 278
-#define T_Return 279
-#define T_Break 280
-#define T_New 281
-#define T_NewArray 282
-#define T_Print 283
-#define T_ReadInteger 284
-#define T_ReadLine 285
-#define T_IntConstant 286
-#define T_DoubleConstant 287
-#define T_StringConstant 288
-#define T_Identifier 289
-#define T_BooleanConstant 290
-#define T_Lineend 291
-#define T_OR 292
-#define T_AND 293
-#define T_HET 294
-#define T_LET 295
-#define T_ELSE 296
-#define T_IFX 297
+#define T_Null 269
+#define T_For 270
+#define T_While 271
+#define T_If 272
+#define T_Else 273
+#define T_Return 274
+#define T_Break 275
+#define T_Print 276
+#define T_ReadInteger 277
+#define T_ReadLine 278
+#define T_IntConstant 279
+#define T_DoubleConstant 280
+#define T_StringConstant 281
+#define T_Identifier 282
+#define T_BooleanConstant 283
+#define T_Lineend 284
+#define T_OR 285
+#define T_AND 286
+#define T_HET 287
+#define T_LET 288
+#define T_ELSE 289
+#define T_IFX 290
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 16 "e2.y"
+#line 15 "e2.y"
 { 
-    int     integerConstant; 
-    int     boolConstant; 
-    const   char *stringConstant; 
-    double  doubleConstant; 
-    char    identifier[128]; 
-
-
     int      ival;
     char     *sval;
     double   dval;
     int      bval;
 }
 /* Line 1529 of yacc.c.  */
-#line 147 "y.tab.h"
+#line 126 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -152,5 +131,4 @@ typedef union YYSTYPE
 
 extern YYSTYPE yylval;
 
-extern int cur_line_num = 1;
 extern int cur_line_num = 1;
