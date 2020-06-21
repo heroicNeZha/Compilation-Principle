@@ -39,17 +39,99 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     T_NUM = 258
+     T_Le = 258,
+     T_Ge = 259,
+     T_Eq = 260,
+     T_Ne = 261,
+     T_Ic = 262,
+     T_Dc = 263,
+     T_And = 264,
+     T_Or = 265,
+     T_Void = 266,
+     T_Int = 267,
+     T_Double = 268,
+     T_Boolean = 269,
+     T_String = 270,
+     T_Null = 271,
+     T_For = 272,
+     T_While = 273,
+     T_If = 274,
+     T_Else = 275,
+     T_Return = 276,
+     T_Break = 277,
+     T_Print = 278,
+     T_ReadInteger = 279,
+     T_ReadLine = 280,
+     T_IntConstant = 281,
+     T_DoubleConstant = 282,
+     T_StringConstant = 283,
+     T_Identifier = 284,
+     T_BooleanConstant = 285,
+     T_Lineend = 286,
+     T_OR = 287,
+     T_AND = 288,
+     T_HET = 289,
+     T_LET = 290,
+     T_DC = 291,
+     T_IC = 292,
+     T_ELSE = 293,
+     T_IFX = 294
    };
 #endif
 /* Tokens.  */
-#define T_NUM 258
+#define T_Le 258
+#define T_Ge 259
+#define T_Eq 260
+#define T_Ne 261
+#define T_Ic 262
+#define T_Dc 263
+#define T_And 264
+#define T_Or 265
+#define T_Void 266
+#define T_Int 267
+#define T_Double 268
+#define T_Boolean 269
+#define T_String 270
+#define T_Null 271
+#define T_For 272
+#define T_While 273
+#define T_If 274
+#define T_Else 275
+#define T_Return 276
+#define T_Break 277
+#define T_Print 278
+#define T_ReadInteger 279
+#define T_ReadLine 280
+#define T_IntConstant 281
+#define T_DoubleConstant 282
+#define T_StringConstant 283
+#define T_Identifier 284
+#define T_BooleanConstant 285
+#define T_Lineend 286
+#define T_OR 287
+#define T_AND 288
+#define T_HET 289
+#define T_LET 290
+#define T_DC 291
+#define T_IC 292
+#define T_ELSE 293
+#define T_IFX 294
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+typedef union YYSTYPE
+#line 15 "e2.y"
+{ 
+    int      ival;
+    char     *sval;
+    double   dval;
+    int      bval;
+}
+/* Line 1529 of yacc.c.  */
+#line 134 "y.tab.h"
+	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
@@ -57,3 +139,4 @@ typedef int YYSTYPE;
 
 extern YYSTYPE yylval;
 
+extern int cur_lineno;
