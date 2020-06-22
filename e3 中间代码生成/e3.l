@@ -2,7 +2,6 @@
 #include "y.tab.h"
 int comment_flag;
 int string_flag;
-int comment_begin;
 int cur_lineno = 1;
 void lex_error(char* msg, int line);
 %}
@@ -90,8 +89,8 @@ STRING_END_ERROR \"[^\"\n]*$
 
 {INTEGER}       { yylval.ival = atoi(yytext); return T_IntConstant;     }
 {DOUBLE}        { yylval.dval = atof(yytext); return T_DoubleConstant;  }
-{STRING}        { yylval.sval = yytext;       return T_StringConstant;  }
-{IDENTIFIER}    { yylval.sval = yytext;       return T_Identifier;      }
+{STRING}        { yylval.sval = strdup(yytext);       return T_StringConstant;  }
+{IDENTIFIER}    { yylval.sval = strdup(yytext);       return T_Identifier;      }
 {WHITESPACE}    { /* skip */                }
 {COMMENT}       { /* skip */                }
 

@@ -3,7 +3,7 @@
 #include <stdlib.h> 
 #include <sys/malloc.h> 
 
-extern int cur_lineno =1;
+extern int cur_lineno;
 int yylex();
 void printProduction(char* nonTerminal,char* symbol);
 void yyerror(const char* msg);

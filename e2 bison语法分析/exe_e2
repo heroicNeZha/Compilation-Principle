@@ -1,5 +1,4 @@
 bison -dyv e2.y
-echo "extern int cur_lineno;" >> y.tab.h
 flex e2.l
 gcc-8 y.tab.h lex.yy.c y.tab.c -o e2
 chmod +x e2
