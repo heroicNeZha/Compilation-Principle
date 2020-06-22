@@ -238,7 +238,9 @@ Expr        :   Constant            { /* empty */          }
             |   Expr '%' Expr       { printf("\tmod\n");      }
             |   '-' Expr            { printf("\tneg\n");            }
             |   Expr T_Dc           { printf("\tpush #1\n\tadd\n");     }
+            |   T_Dc Expr           { printf("\tpush #1\n\tadd\n");     }
             |   Expr T_Ic           { printf("\tpush #1\n\tadd\n");     }
+            |   T_Ic Expr           { printf("\tpush #1\n\tadd\n");    }
             |   Expr '<' Expr       { printf("\tcmplt\n");       }
             |   Expr T_Le Expr      { printf("\tcmple\n");    }
             |   Expr '>' Expr       { printf("\tcmpgt\n");       }

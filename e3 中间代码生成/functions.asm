@@ -31,13 +31,10 @@ FUNC @main:
 	div
 	sub
 	pop d
-
 	pop b
-
 	push #2
 	add
 	pop a
-
 	push #1
 	not
 	push #2
